@@ -1,5 +1,4 @@
 <?php
-// Load dependencies and environment first
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
@@ -7,16 +6,24 @@ $dotenv->load();
 
 session_start();
 
-// Core system and routes
 require_once __DIR__ . '/../app/config/db.php';
 require_once __DIR__ . '/../app/core/csrf.php';
 require_once __DIR__ . '/../app/core/input.php';
 require_once __DIR__ . '/../app/routes.php';
 
-// Routing logic
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
-// If route exists, load controller, otherwise show 404
+$basePath = '/casper/public';
+
+// Remove base path if present
+if (strpos($uri, $basePath) === 0) {
+    $uri = substr($uri, strlen($basePath));
+}
+
+if ($uri === '') {
+    $uri = '/';
+}
+
 $path = $routes[$uri] ?? '404.php';
 $controllerFile = __DIR__ . '/../app/controllers/' . $path;
 
